@@ -15,28 +15,25 @@
 
 /* TODO LIST */
 High Prio:
-	- Add basic player movement and trading
-
+	- Modify the terrain generation so that it fits a first person perspective
+	- Create a 
+	
 Med Prio:
-	- Create a few more interesting biomes using the BiomeManager
-	- Go through Chunk.cs and do small optimizations
-	- Go through ChunkGenerator.cs and do small optimizations
-	- Go through World.cs and do small optimizations
-
+	- Add in basic inventory
+	- Add in the ability to cut down trees and mine stones
+	- Add in ability to build campfire and small shelter
+	
 Low Prio:
+	- Add the ability to modify the terrain
+	- Make each tile have its own tile type
+	- Add save to disk / Load from disk
 	- Implement thermal erosion
 	- Implement hydraulic eriosion
-	- Make it possible to slow down / increase the time speed
 	- Make Regenerate work with Chunk Objects
-
-
+	- Create a few more interesting biomes using the BiomeManager
+	- Create a better system for spawning chunk objects
+	
 Finished:
 	- Refactor te spawning of trees and towns. ChunkGenerator should handle all that stuff.
 	- Make trees combine into single mesh
 	
-
-
-
-
-Scrapped:
-	- Rewrite ChunkGenerator in such way that it doesn't have to be a monobehaviour. Terrain generation should be orchestrated by World with the other classes being used by it
