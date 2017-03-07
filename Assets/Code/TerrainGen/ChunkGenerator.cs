@@ -147,6 +147,8 @@ public class ChunkGenerator : MonoBehaviour
         chunkMesh.triangles = inMeshData.triVertIDs;
 
         chunkMesh.RecalculateNormals();
+
+        inChunk.gameObject.AddComponent<MeshCollider>();
     }
 
     private void OnTextureReceived(TextureData inTextureData, Chunk inChunk)
