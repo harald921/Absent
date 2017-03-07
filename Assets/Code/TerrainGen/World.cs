@@ -133,7 +133,7 @@ public class World : MonoBehaviour
 
     void Update()
     {
-        _currentViewerCoords = GetChunkCoord(_viewerTransform.position);
+        currentViewerCoords = GetChunkCoord(_viewerTransform.position);
 
         _worldGenData.GetHashCode();
 
