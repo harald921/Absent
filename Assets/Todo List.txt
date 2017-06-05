@@ -16,7 +16,6 @@
 /* TODO LIST */
 High Prio:
 	- Modify the terrain generation so that it fits a first person perspective
-	- Create a 
 	
 Med Prio:
 	- Add in basic inventory
