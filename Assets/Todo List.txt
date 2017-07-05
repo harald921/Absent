@@ -1,19 +1,4 @@
-﻿
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/* TODO LIST */
+﻿/* TODO LIST */
 High Prio:
 	- Modify the terrain generation so that it fits a first person perspective
 	
