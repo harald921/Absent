@@ -8,13 +8,13 @@ public class WorldGenerator : MonoBehaviour
 
     ChunkGenerator _chunkGenerator;
 
-    int meshSize; // amount of vertices on one axis
+    [SerializeField] int radius = 3;
 
     void Start()
     {
         _parameters = GetComponent<Noise>().parameters;
 
-        meshSize = _parameters.size + 1;
+        int meshSize = _parameters.size + 1;
 
         _chunkGenerator = new ChunkGenerator(meshSize, _parameters);
 
@@ -23,10 +23,9 @@ public class WorldGenerator : MonoBehaviour
 
     void TestGenerate()
     {
-        int worldSize = 4;
-
-        for (int y = 0; y < worldSize; y++)
-            for (int x = 0; x < worldSize; x++)
-                _chunkGenerator.GenerateChunk(new Vector2(x, y));
+        for (int zCircle = -radius; zCircle <= radius; zCircle++)
+            for (int xCircle = -radius; xCircle <= radius; xCircle++)
+                if (xCircle * xCircle + zCircle * zCircle < radius * radius)
+                    _chunkGenerator.GenerateChunk(new Vector2(xCircle, zCircle));
     }
 }
