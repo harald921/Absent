@@ -27,6 +27,6 @@ public class WorldGenerator : MonoBehaviour
 
         for (int y = 0; y < worldSize; y++)
             for (int x = 0; x < worldSize; x++)
-                _chunkGenerator.GenerateChunk(_parameters, new Vector2(x, y));
+                _chunkGenerator.GenerateChunk(new Vector2(x, y));
     }
 }

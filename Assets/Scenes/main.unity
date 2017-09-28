@@ -133,7 +133,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 301644283}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3fb3a866580d46f428cb9c0bc62d71d2, type: 3}
+  m_Script: {fileID: 11500000, guid: 8ed5a24a60dfcd944ac9dd06d9e78066, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
 --- !u!114 &301644285
@@ -144,12 +144,12 @@ MonoBehaviour:
   m_GameObject: {fileID: 301644283}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 2b8c68dc8b8d68f44b78d6a4387489b0, type: 3}
+  m_Script: {fileID: 11500000, guid: f46302f417c7de24a8eddafaf03c72ef, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   _parameters:
     size: 253
-    scale: 10
+    scale: 100
     octaves: 7
     persistance: 1
     lacunarity: 1
