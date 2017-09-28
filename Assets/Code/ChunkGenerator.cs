@@ -34,7 +34,7 @@ public class ChunkGenerator
         meshFilter.mesh = newMesh;
         meshRenderer.material.mainTexture = GenerateTexture(noiseMap);
 
-        newGO.transform.position = new Vector3(inOffset.x * size, 0, inOffset.y * size);
+        newGO.transform.position = new Vector3(inOffset.x * size, 0, -inOffset.y * size);
 
         Chunk newChunk = new Chunk(newGO);
         return newChunk;
@@ -187,6 +187,7 @@ public class TextureGenerator
                 pixels[y * size + x] = Color.Lerp(Color.black, Color.white, inNoiseMap[x,y]);
 
         Texture2D newTexture = new Texture2D(size, size);
+        newTexture.filterMode = FilterMode.Point;
         newTexture.SetPixels(pixels);
         newTexture.Apply();
 

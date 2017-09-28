@@ -91,11 +91,20 @@ public class WorldGenerator : MonoBehaviour
         List<Vector2> visibleChunkCoords = new List<Vector2>();
 
         // Calculate the coordinates of all the chunks that are within the radius
+
+        /*
         for (int zCircle = -_radius; zCircle <= _radius; zCircle++)
             for (int xCircle = -_radius; xCircle <= _radius; xCircle++)
                 if (xCircle * xCircle + zCircle * zCircle < _radius * _radius)
                     visibleChunkCoords.Add(new Vector2(xCircle - chunksToSide + inChunkCoord.x, 
                                                        zCircle - chunksToSide + inChunkCoord.y));
+        */
+
+        for (int y = 0; y < _radius; y++)
+            for (int x = 0; x < _radius; x++)
+            {
+                visibleChunkCoords.Add(new Vector2(x - chunksToSide - inChunkCoord.x, y - chunksToSide + inChunkCoord.y));
+            }
 
         // Add all the visible chunks to the delete queue
         _chunksToDelete.Clear();
