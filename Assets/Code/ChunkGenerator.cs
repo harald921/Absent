@@ -21,7 +21,7 @@ public class ChunkGenerator
         _textureGenerator = new TextureGenerator(inSize);
     }
 
-    public void GenerateChunk(Vector2 inOffset)
+    public Chunk GenerateChunk(Vector2 inOffset)
     {
         Mesh newMesh = GenerateMesh();
 
@@ -35,6 +35,10 @@ public class ChunkGenerator
         meshRenderer.material.mainTexture = GenerateTexture(noiseMap);
 
         newGO.transform.position = new Vector3(inOffset.x * size, 0, inOffset.y * size);
+
+        Chunk newChunk = new Chunk(newGO);
+        return newChunk;
+
     }
 
     float[,] GenerateNoise(Noise.Parameters inParameters, Vector2 inOffset)
@@ -166,14 +170,12 @@ public class MeshGenerator
 public class TextureGenerator
 {
     readonly int size;
-    readonly Texture2D texture;
     readonly Color[] pixels;
 
 
     public TextureGenerator(int inSize)
     {
         size = inSize;
-        texture = new Texture2D(size, size);
         pixels = new Color[size * size];
     }
 
@@ -184,9 +186,10 @@ public class TextureGenerator
             for (int x = 0; x < size; x++)
                 pixels[y * size + x] = Color.Lerp(Color.black, Color.white, inNoiseMap[x,y]);
 
-        texture.SetPixels(pixels);
-        texture.Apply();
+        Texture2D newTexture = new Texture2D(size, size);
+        newTexture.SetPixels(pixels);
+        newTexture.Apply();
 
-        return texture;
+        return newTexture;
     }
 }
