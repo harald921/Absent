@@ -135,3 +135,5 @@ public class WorldGenerator : MonoBehaviour
         yield return null;
     }
 }
+
+// Fix chunks not seamlessly aligning
