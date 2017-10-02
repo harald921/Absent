@@ -34,20 +34,22 @@ public class WorldGenerator : MonoBehaviour
 
     void Start()
     {
+
         _camTransform = Camera.main.transform;
 
         _parameters = GetComponent<Noise>().parameters;
 
-        int meshSize = _parameters.size + 1;
-
-        _chunkGenerator = new ChunkGenerator(meshSize, _parameters);
+        _chunkGenerator = new ChunkGenerator(_parameters);
     }
 
     void Update()
     {
         currentCameraChunkCoord = GetChunkCoord(_camTransform.position);
 
-        ProcessQueues();
+        _chunkGenerator.Update();
+
+        //if (Input.GetKeyDown(KeyCode.Space))
+            ProcessQueues();
     }
 
     void ProcessQueues()
@@ -65,7 +67,7 @@ public class WorldGenerator : MonoBehaviour
         while (_chunksToDelete.Count > 0)
         {
             Destroy(_worldChunks[_chunksToDelete[0]].gameObject.GetComponent<MeshFilter>().mesh);
-            Destroy(_worldChunks[_chunksToDelete[0]].gameObject.GetComponent<MeshRenderer>().material);
+            Destroy(_worldChunks[_chunksToDelete[0]].gameObject.GetComponent<MeshRenderer>().material.mainTexture);
 
             Destroy(_worldChunks[_chunksToDelete[0]].gameObject);
             _worldChunks.Remove(_chunksToDelete[0]);
@@ -91,7 +93,6 @@ public class WorldGenerator : MonoBehaviour
         List<Vector2> visibleChunkCoords = new List<Vector2>();
 
         // Calculate the coordinates of all the chunks that are within the radius
-
         for (int zCircle = -_radius; zCircle <= _radius; zCircle++)
             for (int xCircle = -_radius; xCircle <= _radius; xCircle++)
                 if (xCircle * xCircle + zCircle * zCircle < _radius * _radius)
@@ -128,7 +129,7 @@ public class WorldGenerator : MonoBehaviour
 
             _chunksToGenerate.RemoveAt(0);
 
-           // yield return null; //I don't think this should be here?
+            // yield return null; // TODO: Add option to load more than one chunk per frame
         }
 
 
@@ -136,5 +137,3 @@ public class WorldGenerator : MonoBehaviour
         yield return null;
     }
 }
-
-// Fix chunks not seamlessly aligning
