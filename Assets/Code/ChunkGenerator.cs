@@ -16,8 +16,12 @@ public class ChunkGenerator
     public Queue<Action> _meshThreadInfoQueue    = new Queue<Action>();
     public Queue<Action> _textureThreadInfoQueue = new Queue<Action>();
 
+    Transform _worldTransform;
+
     public ChunkGenerator(Noise.Parameters inParemeters)
     {
+        _worldTransform = GameObject.Find("World").transform;
+
         _parameters = inParemeters;
 
         _noiseGenerator   = new NoiseGenerator(this);
@@ -34,10 +38,12 @@ public class ChunkGenerator
 
     public Chunk GenerateChunk(Vector2 inOffset)
     {
-        GameObject newGO = new GameObject();
+        GameObject newGO = new GameObject(inOffset.ToString());
+        newGO.transform.SetParent(_worldTransform);
+        newGO.transform.position = new Vector3(inOffset.x * _parameters.size, 0, -inOffset.y * _parameters.size);
+
         newGO.AddComponent<MeshFilter>();
         newGO.AddComponent<MeshRenderer>();
-        newGO.transform.position = new Vector3(inOffset.x * _parameters.size, 0, -inOffset.y * _parameters.size);
 
         Chunk newChunk = new Chunk(newGO);
 
