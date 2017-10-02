@@ -77,7 +77,6 @@ public class ChunkGenerator
 
         Mesh generatedMesh      = inChunk.gameObject.GetComponent<MeshFilter>().mesh;
         generatedMesh.vertices  = inResult.meshData.vertices;
-        generatedMesh.normals   = inResult.meshData.normals;
         generatedMesh.uv        = inResult.meshData.uv;
         generatedMesh.triangles = inResult.meshData.triVertIDs;
         
@@ -143,7 +142,6 @@ public class MeshGenerator
     public struct MeshData
     {
         public Vector3[] vertices;
-        public Vector3[] normals;
         public Vector2[] uv;
         public int[]     triVertIDs;
     }
@@ -158,7 +156,6 @@ public class MeshGenerator
 
         meshData = new MeshData()
         {
-            normals    = new Vector3[vertexCount],
             uv         = new Vector2[vertexCount],
             triVertIDs = new int[inSize * inSize * 6]
         };
@@ -166,12 +163,7 @@ public class MeshGenerator
         // Generate the normals and UVs
         for (int y = 0; y < vertexSize; y++)
             for (int x = 0; x < vertexSize; x++)
-            {
-                int currentIndex = y * vertexSize + x;
-
-                meshData.normals[currentIndex] = Vector2.up;
-                meshData.uv[currentIndex] = new Vector2((float)x / inSize, (float)y / inSize);
-            }
+                meshData.uv[y * vertexSize + x] = new Vector2((float)x / inSize, (float)y / inSize);
 
         // Generate the triVertID's
         bool diagonal = false;
@@ -214,7 +206,6 @@ public class MeshGenerator
         MeshData newMeshData = new MeshData()
         {
             vertices = new Vector3[vertexCount],
-            normals = meshData.normals,
             uv = meshData.uv,
             triVertIDs = meshData.triVertIDs
         };
