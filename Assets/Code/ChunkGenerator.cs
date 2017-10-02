@@ -70,18 +70,17 @@ public class ChunkGenerator
         NoiseGenerator.Result result = new NoiseGenerator.Result();
         Action callbackMethod = new Action(() => OnNoiseDataRecieved(result, inChunk));
 
-        ThreadStart threadStart = delegate { _noiseGenerator.Generate(callbackMethod, result, _parameters, inOffset); };
+        ThreadStart threadStart = () => _noiseGenerator.Generate(callbackMethod, result, _parameters, inOffset);
 
         new Thread(threadStart).Start();
     }
-
 
     void RequestMeshData(float[,] inNoiseMap, Chunk inChunk)
     {
         MeshGenerator.Result result = new MeshGenerator.Result();
         Action callbackMethod = new Action(() => OnMeshDataRecieved(result, inChunk));
 
-        ThreadStart threadStart = delegate { _meshGenerator.Generate(callbackMethod, result, inNoiseMap); };
+        ThreadStart threadStart = () => _meshGenerator.Generate(callbackMethod, result, inNoiseMap);
 
         new Thread(threadStart).Start();
     }
@@ -91,7 +90,7 @@ public class ChunkGenerator
         TextureGenerator.Result result = new TextureGenerator.Result();
         Action callbackMethod = new Action(() => OnTextureDataRecieved(result, inChunk));
 
-        ThreadStart threadStart = delegate { _textureGenerator.Generate(callbackMethod, result, inNoiseMap); };
+        ThreadStart threadStart = () => _textureGenerator.Generate(callbackMethod, result, inNoiseMap);
 
         new Thread(threadStart).Start();
     }
