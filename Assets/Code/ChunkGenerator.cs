@@ -16,7 +16,6 @@ public class ChunkGenerator
     public Queue<Action> _meshThreadInfoQueue    = new Queue<Action>();
     public Queue<Action> _textureThreadInfoQueue = new Queue<Action>();
 
-
     public ChunkGenerator(Noise.Parameters inParemeters)
     {
         _parameters = inParemeters;
@@ -78,7 +77,7 @@ public class ChunkGenerator
         Mesh generatedMesh      = inChunk.gameObject.GetComponent<MeshFilter>().mesh;
         generatedMesh.vertices  = inResult.meshData.vertices;
         generatedMesh.uv        = inResult.meshData.uv;
-        generatedMesh.triangles = inResult.meshData.triVertIDs;
+        generatedMesh.triangles = inResult.meshData.triangles;
         
         generatedMesh.RecalculateNormals(); // http://schemingdeveloper.com/2014/10/17/better-method-recalculate-normals-unity/
 
@@ -143,7 +142,7 @@ public class MeshGenerator
     {
         public Vector3[] vertices;
         public Vector2[] uv;
-        public int[]     triVertIDs;
+        public int[]     triangles;
     }
     MeshData meshData;
 
@@ -157,7 +156,7 @@ public class MeshGenerator
         meshData = new MeshData()
         {
             uv         = new Vector2[vertexCount],
-            triVertIDs = new int[inSize * inSize * 6]
+            triangles = new int[inSize * inSize * 6]
         };
 
         // Generate the normals and UVs
@@ -177,22 +176,22 @@ public class MeshGenerator
 
                 if (diagonal)
                 {
-                    meshData.triVertIDs[triangleOffset + 0] = triVertOffset + 0;
-                    meshData.triVertIDs[triangleOffset + 1] = triVertOffset + vertexSize + 0;
-                    meshData.triVertIDs[triangleOffset + 2] = triVertOffset + vertexSize + 1;
-                    meshData.triVertIDs[triangleOffset + 3] = triVertOffset + 0;
-                    meshData.triVertIDs[triangleOffset + 4] = triVertOffset + vertexSize + 1;
-                    meshData.triVertIDs[triangleOffset + 5] = triVertOffset + 1;
+                    meshData.triangles[triangleOffset + 0] = triVertOffset + 0;
+                    meshData.triangles[triangleOffset + 1] = triVertOffset + vertexSize + 0;
+                    meshData.triangles[triangleOffset + 2] = triVertOffset + vertexSize + 1;
+                    meshData.triangles[triangleOffset + 3] = triVertOffset + 0;
+                    meshData.triangles[triangleOffset + 4] = triVertOffset + vertexSize + 1;
+                    meshData.triangles[triangleOffset + 5] = triVertOffset + 1;
                 }
 
                 else
                 {
-                    meshData.triVertIDs[triangleOffset + 0] = triVertOffset + 0;
-                    meshData.triVertIDs[triangleOffset + 1] = triVertOffset + vertexSize + 0;
-                    meshData.triVertIDs[triangleOffset + 2] = triVertOffset + 1;
-                    meshData.triVertIDs[triangleOffset + 3] = triVertOffset + 1;
-                    meshData.triVertIDs[triangleOffset + 4] = triVertOffset + vertexSize + 0;
-                    meshData.triVertIDs[triangleOffset + 5] = triVertOffset + vertexSize + 1;
+                    meshData.triangles[triangleOffset + 0] = triVertOffset + 0;
+                    meshData.triangles[triangleOffset + 1] = triVertOffset + vertexSize + 0;
+                    meshData.triangles[triangleOffset + 2] = triVertOffset + 1;
+                    meshData.triangles[triangleOffset + 3] = triVertOffset + 1;
+                    meshData.triangles[triangleOffset + 4] = triVertOffset + vertexSize + 0;
+                    meshData.triangles[triangleOffset + 5] = triVertOffset + vertexSize + 1;
                 }
 
                 diagonal = !diagonal;
@@ -207,7 +206,7 @@ public class MeshGenerator
         {
             vertices = new Vector3[vertexCount],
             uv = meshData.uv,
-            triVertIDs = meshData.triVertIDs
+            triangles = meshData.triangles
         };
 
         // Generate the vertices of the mesh
