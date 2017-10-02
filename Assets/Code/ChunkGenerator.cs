@@ -137,9 +137,6 @@ public class MeshGenerator
         public MeshData meshData;
     }
 
-    readonly int size;
-    readonly int tileCount;
-    readonly int triangleCount;
     readonly int vertexSize;
     readonly int vertexCount;
 
@@ -156,17 +153,14 @@ public class MeshGenerator
     {
         _chunkGenerator = inChunkGenerator;
 
-        size          = inSize;
-        tileCount     = size * size;
-        triangleCount = tileCount * 2;
-        vertexSize    = size + 1;
+        vertexSize    = inSize + 1;
         vertexCount   = vertexSize * vertexSize;
 
         meshData = new MeshData()
         {
             normals    = new Vector3[vertexCount],
             uv         = new Vector2[vertexCount],
-            triVertIDs = new int[triangleCount * 3]
+            triVertIDs = new int[inSize * inSize * 6]
         };
 
         // Generate the normals and UVs
@@ -176,16 +170,16 @@ public class MeshGenerator
                 int currentIndex = y * vertexSize + x;
 
                 meshData.normals[currentIndex] = Vector2.up;
-                meshData.uv[currentIndex] = new Vector2((float)x / size, (float)y / size);
+                meshData.uv[currentIndex] = new Vector2((float)x / inSize, (float)y / inSize);
             }
 
         // Generate the triVertID's
         bool diagonal = false;
-        for (int y = 0; y < size; y++)
+        for (int y = 0; y < inSize; y++)
         {
-            for (int x = 0; x < size; x++)
+            for (int x = 0; x < inSize; x++)
             {
-                int currentTileID = y * size + x;
+                int currentTileID = y * inSize + x;
                 int triVertOffset = y * vertexSize + x;
                 int triangleOffset = currentTileID * 6;
 
