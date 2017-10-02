@@ -13,7 +13,6 @@ public class ChunkGenerator
     MeshGenerator    _meshGenerator;
     TextureGenerator _textureGenerator;
 
-    public Queue<Action> _noiseThreadInfoQueue   = new Queue<Action>();
     public Queue<Action> _meshThreadInfoQueue    = new Queue<Action>();
     public Queue<Action> _textureThreadInfoQueue = new Queue<Action>();
 
@@ -52,9 +51,6 @@ public class ChunkGenerator
     // Internal
     void ProcessQueues()
     {
-        while (_noiseThreadInfoQueue.Count > 0)
-            _noiseThreadInfoQueue.Dequeue()();
-
         while (_meshThreadInfoQueue.Count > 0)
             _meshThreadInfoQueue.Dequeue()();
 
@@ -146,10 +142,6 @@ public class MeshGenerator
     readonly int triangleCount;
     readonly int vertexSize;
     readonly int vertexCount;
-
-    public readonly Vector3[] normals;
-    public readonly Vector2[] uv;
-    public readonly int[] triVertIDs;
 
     public struct MeshData
     {
