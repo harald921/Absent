@@ -43,7 +43,7 @@ public class ChunkGenerator
 
         Chunk newChunk = new Chunk(newGO);
 
-        RequestNoiseData(inOffset, newChunk);
+        new Thread(() => GenerateChunkData(inOffset, newChunk)).Start();
 
         return newChunk;
     }
@@ -62,49 +62,19 @@ public class ChunkGenerator
             _textureThreadInfoQueue.Dequeue()();
     }
 
-
-
-    // Request methods
-    void RequestNoiseData(Vector2 inOffset, Chunk inChunk)
+    void GenerateChunkData(Vector2 inOffset, Chunk inChunk)
     {
-        NoiseGenerator.Result result = new NoiseGenerator.Result();
-        Action callbackMethod = new Action(() => OnNoiseDataRecieved(result, inChunk));
+        NoiseGenerator.Result noiseResult = new NoiseGenerator.Result();
+        Thread noiseThread = new Thread(() => _noiseGenerator.Generate(noiseResult, _parameters, inOffset, inChunk));
 
-        ThreadStart threadStart = () => _noiseGenerator.Generate(callbackMethod, result, _parameters, inOffset);
+        noiseThread.Start();
+        noiseThread.Join();
 
-        new Thread(threadStart).Start();
+        new Thread(() => _meshGenerator.Generate(noiseResult, inChunk)).Start();
+        new Thread(() => _textureGenerator.Generate(noiseResult, inChunk)).Start();
     }
 
-    void RequestMeshData(float[,] inNoiseMap, Chunk inChunk)
-    {
-        MeshGenerator.Result result = new MeshGenerator.Result();
-        Action callbackMethod = new Action(() => OnMeshDataRecieved(result, inChunk));
-
-        ThreadStart threadStart = () => _meshGenerator.Generate(callbackMethod, result, inNoiseMap);
-
-        new Thread(threadStart).Start();
-    }
-
-    void RequestTextureData(float[,] inNoiseMap, Chunk inChunk)
-    {
-        TextureGenerator.Result result = new TextureGenerator.Result();
-        Action callbackMethod = new Action(() => OnTextureDataRecieved(result, inChunk));
-
-        ThreadStart threadStart = () => _textureGenerator.Generate(callbackMethod, result, inNoiseMap);
-
-        new Thread(threadStart).Start();
-    }
-
-
-
-    // Recieved methods
-    void OnNoiseDataRecieved(NoiseGenerator.Result inResult, Chunk inChunk)
-    {
-        RequestMeshData(inResult.heightMap, inChunk);
-        RequestTextureData(inResult.heightMap, inChunk);
-    }
-
-    void OnMeshDataRecieved(MeshGenerator.Result inResult, Chunk inChunk)
+    public void OnMeshDataRecieved(MeshGenerator.Result inResult, Chunk inChunk)
     {
         if (!inChunk.gameObject)
             return;
@@ -120,7 +90,7 @@ public class ChunkGenerator
         inChunk.gameObject.GetComponent<MeshFilter>().mesh = generatedMesh;
     }
 
-    void OnTextureDataRecieved(TextureGenerator.Result inResult, Chunk inChunk)
+    public void OnTextureDataRecieved(TextureGenerator.Result inResult, Chunk inChunk)
     {
         if (!inChunk.gameObject)
             return;
@@ -153,12 +123,9 @@ public class NoiseGenerator
     }
 
 
-    public void Generate(Action inCallbackMethod, Result inResult, Noise.Parameters inParameters, Vector2 inOffset)
+    public void Generate(Result inResult, Noise.Parameters inParameters, Vector2 inOffset, Chunk inChunk)
     {
         inResult.heightMap = Noise.Generate(inParameters, inOffset);
-
-        lock (_chunkGenerator._noiseThreadInfoQueue)
-            _chunkGenerator._noiseThreadInfoQueue.Enqueue(inCallbackMethod);
     }
 }
 
@@ -256,7 +223,7 @@ public class MeshGenerator
     }
 
 
-    public void Generate(Action inCallbackMethod, Result inResult, float[,] inNoiseMap)
+    public void Generate(NoiseGenerator.Result inNoiseResult, Chunk inChunk)
     {
         MeshData newMeshData = new MeshData()
         {
@@ -273,14 +240,15 @@ public class MeshGenerator
                 int iteration = y * vertexSize + x;
 
                 newMeshData.vertices[iteration].x = x;
-                newMeshData.vertices[iteration].y = inNoiseMap[x,y] * 100; // Possible performance tweak
+                newMeshData.vertices[iteration].y = inNoiseResult.heightMap[x,y] * 100;
                 newMeshData.vertices[iteration].z = y;
             }
 
-        inResult.meshData = newMeshData;
+        Result result = new Result();
+        result.meshData = newMeshData;
 
         lock (_chunkGenerator._meshThreadInfoQueue)
-            _chunkGenerator._meshThreadInfoQueue.Enqueue(inCallbackMethod);
+            _chunkGenerator._meshThreadInfoQueue.Enqueue(() => _chunkGenerator.OnMeshDataRecieved(result, inChunk));
     }
 }
 
@@ -306,17 +274,18 @@ public class TextureGenerator
     }
 
 
-    public void Generate(Action inCallbackMethod, Result inResult, float[,] inNoiseMap)
+    public void Generate(NoiseGenerator.Result inNoiseResult, Chunk inChunk)
     {
         Color[] pixels = new Color[size * size];
 
         for (int y = 0; y < size; y++)
             for (int x = 0; x < size; x++)
-                pixels[y * size + x] = Color.Lerp(Color.black, Color.white, inNoiseMap[x,y]);
+                pixels[y * size + x] = Color.Lerp(Color.black, Color.white, inNoiseResult.heightMap[x,y]);
 
-        inResult.pixels = pixels;
+        Result result = new Result();
+        result.pixels = pixels;
 
         lock (_chunkGenerator._textureThreadInfoQueue)
-            _chunkGenerator._textureThreadInfoQueue.Enqueue(inCallbackMethod);
+            _chunkGenerator._textureThreadInfoQueue.Enqueue(() => _chunkGenerator.OnTextureDataRecieved(result, inChunk));
     }
 }
