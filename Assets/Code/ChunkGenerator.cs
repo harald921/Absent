@@ -141,8 +141,9 @@ public class MeshGenerator
         public MeshData meshData;
     }
 
-    readonly int vertexSize;
-    readonly int vertexCount;
+    readonly int _size;
+    readonly int _vertexSize;
+    readonly int _vertexCount;
 
     public struct MeshData
     {
@@ -156,53 +157,39 @@ public class MeshGenerator
     {
         _chunkGenerator = inChunkGenerator;
 
-        vertexSize    = inSize + 1;
-        vertexCount   = vertexSize * vertexSize;
+        _size          = inSize;
+        _vertexSize    = inSize * 2;
+        _vertexCount   = inSize * inSize * 4;
 
         meshData = new MeshData()
         {
-            uv         = new Vector2[vertexCount],
+            uv         = new Vector2[_vertexCount],
             triangles = new int[inSize * inSize * 6]
         };
 
         // Generate the normals and UVs
-        for (int y = 0; y < vertexSize; y++)
-            for (int x = 0; x < vertexSize; x++)
-                meshData.uv[y * vertexSize + x] = new Vector2((float)x / inSize, (float)y / inSize);
+        for (int y = 0; y < _vertexSize; y++)
+            for (int x = 0; x < _vertexSize; x++)
+                meshData.uv[y * _vertexSize + x] = new Vector2((float)x / inSize, (float)y / inSize);
 
         // Generate the triVertID's
-        bool diagonal = false;
-        for (int y = 0; y < inSize; y++)
-        {
-            for (int x = 0; x < inSize; x++)
+        int currentQuad = 0;
+        for (int y = 0; y < _vertexSize; y += 2)
+            for (int x = 0; x < _vertexSize; x += 2)
             {
-                int currentTileID = y * inSize + x;
-                int triVertOffset = y * vertexSize + x;
-                int triangleOffset = currentTileID * 6;
+                int triangleOffset = currentQuad * 6;
+                int currentVertex = y * _vertexSize + x;
 
-                if (diagonal)
-                {
-                    meshData.triangles[triangleOffset + 0] = triVertOffset + 0;
-                    meshData.triangles[triangleOffset + 1] = triVertOffset + vertexSize + 0;
-                    meshData.triangles[triangleOffset + 2] = triVertOffset + vertexSize + 1;
-                    meshData.triangles[triangleOffset + 3] = triVertOffset + 0;
-                    meshData.triangles[triangleOffset + 4] = triVertOffset + vertexSize + 1;
-                    meshData.triangles[triangleOffset + 5] = triVertOffset + 1;
-                }
+                meshData.triangles[triangleOffset + 0] = currentVertex + 0;
+                meshData.triangles[triangleOffset + 1] = currentVertex + _vertexSize + 1;
+                meshData.triangles[triangleOffset + 2] = currentVertex + 1;
 
-                else
-                {
-                    meshData.triangles[triangleOffset + 0] = triVertOffset + 0;
-                    meshData.triangles[triangleOffset + 1] = triVertOffset + vertexSize + 0;
-                    meshData.triangles[triangleOffset + 2] = triVertOffset + 1;
-                    meshData.triangles[triangleOffset + 3] = triVertOffset + 1;
-                    meshData.triangles[triangleOffset + 4] = triVertOffset + vertexSize + 0;
-                    meshData.triangles[triangleOffset + 5] = triVertOffset + vertexSize + 1;
-                }
+                meshData.triangles[triangleOffset + 3] = currentVertex + 0;
+                meshData.triangles[triangleOffset + 4] = currentVertex + _vertexSize + 0;
+                meshData.triangles[triangleOffset + 5] = currentVertex + _vertexSize + 1;
 
-                diagonal = !diagonal;
+                currentQuad++;
             }
-        }
     }
 
 
@@ -210,21 +197,38 @@ public class MeshGenerator
     {
         MeshData newMeshData = new MeshData()
         {
-            vertices = new Vector3[vertexCount],
+            vertices = new Vector3[_vertexCount],
             uv = meshData.uv,
             triangles = meshData.triangles
         };
 
         // Generate the vertices of the mesh
-        for (int y = 0; y < vertexSize; y++)
-            for (int x = 0; x < vertexSize; x++)
+        int vertexID = 0;
+        for (int y = 0; y < _size; y++)
+        {
+            for (int x = 0; x < _size; x++)
             {
-                int iteration = y * vertexSize + x;
+                newMeshData.vertices[vertexID].x = x;
+                newMeshData.vertices[vertexID].y = inNoiseResult.heightMap[x,y] * 100;
+                newMeshData.vertices[vertexID].z = y;
 
-                newMeshData.vertices[iteration].x = x;
-                newMeshData.vertices[iteration].y = inNoiseResult.heightMap[x,y] * 100;
-                newMeshData.vertices[iteration].z = y;
+                newMeshData.vertices[vertexID + 1].x = x + 1;
+                newMeshData.vertices[vertexID + 1].y = inNoiseResult.heightMap[x + 1, y] * 100;
+                newMeshData.vertices[vertexID + 1].z = y;
+
+                newMeshData.vertices[vertexID + _vertexSize].x = x;
+                newMeshData.vertices[vertexID + _vertexSize].y = inNoiseResult.heightMap[x, y + 1] * 100;
+                newMeshData.vertices[vertexID + _vertexSize].z = y + 1;
+
+                newMeshData.vertices[vertexID + _vertexSize + 1].x = x + 1;
+                newMeshData.vertices[vertexID + _vertexSize + 1].y = inNoiseResult.heightMap[x + 1, y + 1] * 100;
+                newMeshData.vertices[vertexID + _vertexSize + 1].z = y + 1;
+
+                vertexID += 2;
             }
+            vertexID += _vertexSize;
+        }
+
 
         Result result = new Result();
         result.meshData = newMeshData;
@@ -262,7 +266,7 @@ public class TextureGenerator
 
         for (int y = 0; y < size; y++)
             for (int x = 0; x < size; x++)
-                pixels[y * size + x] = Color.Lerp(Color.black, Color.white, inNoiseResult.heightMap[x,y]);
+                pixels[y * size + x] = Color.Lerp(Color.black, Color.white, 0.5f);
 
         Result result = new Result();
         result.pixels = pixels;

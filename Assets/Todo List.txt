@@ -1,9 +1,10 @@
 ﻿/* TODO LIST */
 High Prio:
+	- Find out a way to map each tile's UVs to a texture atlas
 	- Modify the terrain generation so that it fits a first person perspective
-	
+
 Med Prio:
-	- Add in basic inventory
+	- Add in super basic inventory
 	- Add in the ability to cut down trees and mine stones
 	- Add in ability to build campfire and small shelter
 	
