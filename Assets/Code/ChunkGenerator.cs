@@ -49,6 +49,10 @@ public class ChunkGenerator
 
         new Thread(() => GenerateChunkData(inOffset, newChunk)).Start();
 
+        newGO.GetComponent<MeshRenderer>().material.mainTexture = GameObject.FindObjectOfType<AtlasManager>().atlas;
+        newGO.GetComponent<MeshRenderer>().material.SetFloat("_Glossiness", 0.0f);
+        newGO.GetComponent<MeshRenderer>().material.SetFloat("_Metallic", 0.0f);
+
         return newChunk;
     }
 
@@ -72,7 +76,8 @@ public class ChunkGenerator
         noiseThread.Join();
 
         new Thread(() => _meshGenerator.Generate(noiseResult, inChunk)).Start();
-        new Thread(() => _textureGenerator.Generate(noiseResult, inChunk)).Start();
+
+        //new Thread(() => _textureGenerator.Generate(noiseResult, inChunk)).Start();
     }
 
     public void OnMeshDataRecieved(MeshGenerator.Result inResult, Chunk inChunk)
@@ -95,12 +100,10 @@ public class ChunkGenerator
         if (!inChunk.gameObject)
             return;
 
-        Texture2D newTexture = new Texture2D(_parameters.size, _parameters.size);
-        newTexture.filterMode = FilterMode.Point;
-        newTexture.SetPixels(inResult.pixels);
-        newTexture.Apply();
-
-        inChunk.gameObject.GetComponent<MeshRenderer>().material.mainTexture = newTexture;
+        //Texture2D newTexture = new Texture2D(_parameters.size, _parameters.size);
+        //newTexture.filterMode = FilterMode.Point;
+        //newTexture.SetPixels(inResult.pixels);
+        //newTexture.Apply();
     }
 }
 
@@ -163,15 +166,8 @@ public class MeshGenerator
 
         _meshData = new MeshData()
         {
-            uv        = new Vector2[_vertexCount],
             triangles = new int[inSize * inSize * 6]
         };
-
-
-        // Generate the normals and UVs
-        for (int y = 0; y < _vertexSize; y++)
-            for (int x = 0; x < _vertexSize; x++)
-                _meshData.uv[y * _vertexSize + x] = new Vector2((float)x / inSize, (float)y / inSize);
 
         // Generate the triVertID's
         int currentQuad = 0;
@@ -224,10 +220,51 @@ public class MeshGenerator
             vertexID += _vertexSize;
         }
 
+        vertexID = 0;
+        Vector2[] newUV = new Vector2[_vertexCount];
+        for (int y = 0; y < _size; y++)
+        {
+            for (int x = 0; x < _size; x++)
+            {
+                if (inNoiseResult.heightMap[x,y] < 0.3f)
+                {
+                    newUV[vertexID].x = 0;
+                    newUV[vertexID].y = 0;
+
+                    newUV[vertexID + 1].x = 0.25f;
+                    newUV[vertexID + 1].y = 0;
+
+                    newUV[vertexID + _vertexSize].x = 0;
+                    newUV[vertexID + _vertexSize].y = 0.25f;
+
+                    newUV[vertexID + _vertexSize + 1].x = 0.25f;
+                    newUV[vertexID + _vertexSize + 1].y = 0.25f;
+                }
+
+                else
+                {
+                    newUV[vertexID].x = 0.25f;
+                    newUV[vertexID].y = 0;
+
+                    newUV[vertexID + 1].x = 0.5f;
+                    newUV[vertexID + 1].y = 0;
+
+                    newUV[vertexID + _vertexSize].x = 0.25f;
+                    newUV[vertexID + _vertexSize].y = 0.25f;
+
+                    newUV[vertexID + _vertexSize + 1].x = 0.5f;
+                    newUV[vertexID + _vertexSize + 1].y = 0.25f;
+                }
+
+                vertexID += 2;
+            }
+            vertexID += _vertexSize;
+        }
+
         MeshData newMeshData = new MeshData()
         {
             vertices  = newVertices,
-            uv        = _meshData.uv,
+            uv        = newUV,
             triangles = _meshData.triangles
         };
 

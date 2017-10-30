@@ -34,7 +34,6 @@ public class WorldGenerator : MonoBehaviour
 
     void Start()
     {
-
         _camTransform = Camera.main.transform;
 
         _parameters = GetComponent<Noise>().parameters;
@@ -67,7 +66,7 @@ public class WorldGenerator : MonoBehaviour
         while (_chunksToDelete.Count > 0)
         {
             Destroy(_worldChunks[_chunksToDelete[0]].gameObject.GetComponent<MeshFilter>().mesh);
-            Destroy(_worldChunks[_chunksToDelete[0]].gameObject.GetComponent<MeshRenderer>().material.mainTexture);
+            //Destroy(_worldChunks[_chunksToDelete[0]].gameObject.GetComponent<MeshRenderer>().material.mainTexture);
 
             Destroy(_worldChunks[_chunksToDelete[0]].gameObject);
             _worldChunks.Remove(_chunksToDelete[0]);
