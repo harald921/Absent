@@ -7,7 +7,7 @@ using System.Collections.Generic;
 
 public class ChunkGenerator
 {
-    public Noise.Parameters _parameters { private get; set; }
+    public Noise.Parameters[] _parameters { private get; set; }
 
     NoiseGenerator   _noiseGenerator;
     MeshGenerator    _meshGenerator;
@@ -18,15 +18,15 @@ public class ChunkGenerator
 
     Transform _worldTransform;
 
-    public ChunkGenerator(Noise.Parameters inParemeters)
+    public ChunkGenerator(Noise.Parameters[] inParemeters)
     {
         _worldTransform = GameObject.Find("World").transform;
 
         _parameters = inParemeters;
 
         _noiseGenerator   = new NoiseGenerator(this);
-        _meshGenerator    = new MeshGenerator(this, inParemeters.size);
-        _textureGenerator = new TextureGenerator(this, inParemeters.size);
+        _meshGenerator    = new MeshGenerator(this, inParemeters[0].resolution);
+        _textureGenerator = new TextureGenerator(this, inParemeters[0].resolution);
     }
 
 
@@ -40,7 +40,7 @@ public class ChunkGenerator
     {
         GameObject newGO = new GameObject(inOffset.ToString());
         newGO.transform.SetParent(_worldTransform);
-        newGO.transform.position = new Vector3(inOffset.x * _parameters.size, 0, -inOffset.y * _parameters.size);
+        newGO.transform.position = new Vector3(inOffset.x * _parameters[0].resolution, 0, -inOffset.y * _parameters[0].resolution);
 
         newGO.AddComponent<MeshFilter>();
         newGO.AddComponent<MeshRenderer>();
@@ -117,6 +117,7 @@ public class NoiseGenerator
     public class Result
     {
         public float[,] heightMap;
+        public float[,] mountainMap;
     }
 
 
@@ -126,9 +127,10 @@ public class NoiseGenerator
     }
 
 
-    public void Generate(Result inResult, Noise.Parameters inParameters, Vector2 inOffset, Chunk inChunk)
+    public void Generate(Result inResult, Noise.Parameters[] inParameters, Vector2 inOffset, Chunk inChunk)
     {
-        inResult.heightMap = Noise.Generate(inParameters, inOffset);
+        inResult.heightMap = Noise.Generate(inParameters[0], inOffset);
+        inResult.mountainMap = Noise.Generate(inParameters[1], inOffset);
     }
 }
 
@@ -200,25 +202,26 @@ public class MeshGenerator
             for (int x = 0; x < _size; x++)
             {
                 newVertices[vertexID].x = x;
-                newVertices[vertexID].y = inNoiseResult.heightMap[x,y] * 100;
+                newVertices[vertexID].y = inNoiseResult.heightMap[x,y] * 100 + inNoiseResult.mountainMap[x,y] * 200;
                 newVertices[vertexID].z = y;
 
                 newVertices[vertexID + 1].x = x + 1;
-                newVertices[vertexID + 1].y = inNoiseResult.heightMap[x + 1, y] * 100;
+                newVertices[vertexID + 1].y = inNoiseResult.heightMap[x + 1, y] * 100 + inNoiseResult.mountainMap[x + 1, y] * 200;
                 newVertices[vertexID + 1].z = y;
 
                 newVertices[vertexID + _vertexSize].x = x;
-                newVertices[vertexID + _vertexSize].y = inNoiseResult.heightMap[x, y + 1] * 100;
+                newVertices[vertexID + _vertexSize].y = inNoiseResult.heightMap[x, y + 1] * 100 + inNoiseResult.mountainMap[x, y +1 ] * 200;
                 newVertices[vertexID + _vertexSize].z = y + 1;
 
                 newVertices[vertexID + _vertexSize + 1].x = x + 1;
-                newVertices[vertexID + _vertexSize + 1].y = inNoiseResult.heightMap[x + 1, y + 1] * 100;
+                newVertices[vertexID + _vertexSize + 1].y = inNoiseResult.heightMap[x + 1, y + 1] * 100 + inNoiseResult.mountainMap[x + 1, y + 1] * 200;
                 newVertices[vertexID + _vertexSize + 1].z = y + 1;
 
                 vertexID += 2;
             }
             vertexID += _vertexSize;
         }
+
 
         vertexID = 0;
         Vector2[] newUV = new Vector2[_vertexCount];

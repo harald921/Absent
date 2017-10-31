@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 public class WorldGenerator : MonoBehaviour
 {
-    Noise.Parameters _parameters;
+    Noise.Parameters[] _parameters;
     ChunkGenerator _chunkGenerator;
 
     [SerializeField] int _radius = 3;
@@ -77,7 +77,7 @@ public class WorldGenerator : MonoBehaviour
 
     Vector2 GetChunkCoord(Vector3 inWorldPosition)
     {
-        Vector2 chunkCoords = new Vector2(inWorldPosition.x / _parameters.size, -(inWorldPosition.z / _parameters.size));
+        Vector2 chunkCoords = new Vector2(inWorldPosition.x / _parameters[0].resolution, -(inWorldPosition.z / _parameters[0].resolution));
 
         chunkCoords.x = Mathf.Floor(chunkCoords.x);
         chunkCoords.y = Mathf.Ceil(chunkCoords.y);
