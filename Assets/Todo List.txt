@@ -1,15 +1,15 @@
 ﻿/* TODO LIST */
 High Prio:
-	- Find out a way to map each tile's UVs to a texture atlas
-	- Modify the terrain generation so that it fits a first person perspective
+	- Find out the max size of a texture atlas
+	- Find out how to use multiple texture atlases if more than one is needed
 
 Med Prio:
 	- Add in super basic inventory
 	- Add in the ability to cut down trees and mine stones
+	- Add the ability to modify the terrain
 	- Add in ability to build campfire and small shelter
 	
 Low Prio:
-	- Add the ability to modify the terrain
 	- Make each tile have its own tile type
 	- Add save to disk / Load from disk
 	- Implement thermal erosion
@@ -19,6 +19,17 @@ Low Prio:
 	- Create a better system for spawning chunk objects
 	
 Finished:
+	- Find out a way to map each tile's UVs to a texture atlas
+	- Modify the terrain generation so that it fits a first person perspective
 	- Refactor te spawning of trees and towns. ChunkGenerator should handle all that stuff.
 	- Make trees combine into single mesh
 	
+
+
+Random thought:
+
+* I need a class that mushes together individual textures into a texture atlas. The AtlasManager could do this. It takes in an array of textures, multiple if multiple atlases are needed, and simply reads the pixels and settings.
+ 
+* I probably need to generate borders around each texture in the atlas. I'll skip that to begin with an implement it if it's really needed.
+
+* I need to set the horrible garbage default mip maps of the generated atlas. To begin with, I'll make my own weird downscale algorithm to do that. Doesn't have to be pretty, just have to work.
