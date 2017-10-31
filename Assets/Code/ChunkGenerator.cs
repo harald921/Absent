@@ -18,8 +18,11 @@ public class ChunkGenerator
 
     Transform _worldTransform;
 
+    AtlasManager _atlasManager;
+
     public ChunkGenerator(Noise.Parameters[] inParemeters)
     {
+        _atlasManager   = GameObject.FindObjectOfType<AtlasManager>();
         _worldTransform = GameObject.Find("World").transform;
 
         _parameters = inParemeters;
@@ -75,7 +78,7 @@ public class ChunkGenerator
         noiseThread.Start();
         noiseThread.Join();
 
-        new Thread(() => _meshGenerator.Generate(noiseResult, inChunk)).Start();
+        new Thread(() => _meshGenerator.Generate(noiseResult, _atlasManager, inChunk)).Start();
 
         //new Thread(() => _textureGenerator.Generate(noiseResult, inChunk)).Start();
     }
@@ -192,7 +195,7 @@ public class MeshGenerator
     }
 
 
-    public void Generate(NoiseGenerator.Result inNoiseResult, Chunk inChunk)
+    public void Generate(NoiseGenerator.Result inNoiseResult, AtlasManager inAtlasManager, Chunk inChunk)
     {
         // Generate the vertices of the mesh
         Vector3[] newVertices = new Vector3[_vertexCount];
@@ -229,34 +232,38 @@ public class MeshGenerator
         {
             for (int x = 0; x < _size; x++)
             {
-                if (inNoiseResult.heightMap[x,y] < 0.3f)
+                if (inNoiseResult.heightMap[x,y] < 1.0f)
                 {
-                    newUV[vertexID].x = 0;
-                    newUV[vertexID].y = 0;
+                    Vector2[] UVs = inAtlasManager.GetSpriteUVs(0, 0);
 
-                    newUV[vertexID + 1].x = 0.25f;
-                    newUV[vertexID + 1].y = 0;
+                    newUV[vertexID].x = UVs[0].x;
+                    newUV[vertexID].y = UVs[0].y;
 
-                    newUV[vertexID + _vertexSize].x = 0;
-                    newUV[vertexID + _vertexSize].y = 0.25f;
+                    newUV[vertexID + 1].x = UVs[1].x;
+                    newUV[vertexID + 1].y = UVs[1].y;
 
-                    newUV[vertexID + _vertexSize + 1].x = 0.25f;
-                    newUV[vertexID + _vertexSize + 1].y = 0.25f;
+                    newUV[vertexID + _vertexSize].x = UVs[2].x;
+                    newUV[vertexID + _vertexSize].y = UVs[2].y;
+
+                    newUV[vertexID + _vertexSize + 1].x = UVs[3].x;
+                    newUV[vertexID + _vertexSize + 1].y = UVs[3].y;
                 }
 
                 else
                 {
-                    newUV[vertexID].x = 0.25f;
-                    newUV[vertexID].y = 0;
+                    Vector2[] UVs = inAtlasManager.GetSpriteUVs(1, 0);
 
-                    newUV[vertexID + 1].x = 0.5f;
-                    newUV[vertexID + 1].y = 0;
+                    newUV[vertexID].x = UVs[0].x;
+                    newUV[vertexID].y = UVs[0].y;
 
-                    newUV[vertexID + _vertexSize].x = 0.25f;
-                    newUV[vertexID + _vertexSize].y = 0.25f;
+                    newUV[vertexID + 1].x = UVs[1].x;
+                    newUV[vertexID + 1].y = UVs[1].y;
 
-                    newUV[vertexID + _vertexSize + 1].x = 0.5f;
-                    newUV[vertexID + _vertexSize + 1].y = 0.25f;
+                    newUV[vertexID + _vertexSize].x = UVs[2].x;
+                    newUV[vertexID + _vertexSize].y = UVs[2].y;
+
+                    newUV[vertexID + _vertexSize + 1].x = UVs[3].x;
+                    newUV[vertexID + _vertexSize + 1].y = UVs[3].y;
                 }
 
                 vertexID += 2;

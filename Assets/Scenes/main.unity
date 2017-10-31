@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 0.18028334, g: 0.2257134, b: 0.30692226, a: 1}
+  m_IndirectSpecularColor: {r: 0.18028378, g: 0.22571412, b: 0.30692285, a: 1}
 --- !u!157 &3
 LightmapSettings:
   m_ObjectHideFlags: 0
@@ -150,14 +150,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _parameters:
-  - resolution: 100
+  - resolution: 127
     scale: 200
     octaves: 7
     persistance: 0.32
     lacunarity: 2.37
     rangeMultiplier: 1
     seed: 23
-  - resolution: 100
+  - resolution: 127
     scale: 4000
     octaves: 2
     persistance: 0.4
@@ -188,6 +188,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: aec006fedd62bfd42a1ac1b7197c8331, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _spriteResolution: 512
+  _paddingThickness: 10
   _atlas: {fileID: 2800000, guid: 9b24ddc925373cc459b01704e6931010, type: 3}
 --- !u!1 &615401925
 GameObject:
@@ -309,12 +311,12 @@ Light:
   m_SpotAngle: 30
   m_CookieSize: 10
   m_Shadows:
-    m_Type: 2
+    m_Type: 0
     m_Resolution: -1
     m_CustomResolution: -1
     m_Strength: 1
-    m_Bias: 0.05
-    m_NormalBias: 0.4
+    m_Bias: 0.5
+    m_NormalBias: 3
     m_NearPlane: 0.2
   m_Cookie: {fileID: 0}
   m_DrawHalo: 0
