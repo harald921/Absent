@@ -33,3 +33,5 @@ Random thought:
 * I probably need to generate borders around each texture in the atlas. I'll skip that to begin with an implement it if it's really needed.
 
 * I need to set the horrible garbage default mip maps of the generated atlas. To begin with, I'll make my own weird downscale algorithm to do that. Doesn't have to be pretty, just have to work.
+
+* Rather than using an atlas, I could just create a gigantic Texture2D array!! Just pass the index as a UV2
