@@ -1,7 +1,8 @@
 ﻿/* TODO LIST */
 High Prio:
-	- Find out the max size of a texture atlas
-	- Find out how to use multiple texture atlases if more than one is needed
+	- Find out the max size of texture2DArray
+	- Use Texture2DArray instead of texture atlases
+	- Create a tool to preview noise maps
 
 Med Prio:
 	- Add in super basic inventory
