@@ -1,8 +1,14 @@
 ﻿/* TODO LIST */
 High Prio:
-	- Create a tool to preview noise maps
+	- Create a "TileSerializer", which is a monobehaviour that allows the user to define every tile type. This class should also initialize and set the TileManager singleton.
+	- Create a "TileManager" singleton which holds an array of "Tile". 
+	- Make each chunk keep track of an array of "ChunkTile", a struct which holds the type and height of a tile on the chunk.
+	- Create a "GetChunkTile(int x, int y)" method which return the ChunkTile located at the input coordinates
+	- Create a "SetChunkTile(int x, int y, ChunkTile inChunkTile)" method which allows the user to modify the terrain
+
 
 Med Prio:
+	- Create a tool to preview noise maps
 	- Spawn in different types of trees
 	- Add in super basic inventory
 	- Add in the ability to cut down trees and mine stones
@@ -18,19 +24,57 @@ Low Prio:
 	- Create a few more interesting biomes using the BiomeManager
 	- Create a better system for spawning chunk objects
 	
-Finished:
-	- Find out a way to map each tile's UVs to a texture atlas
-	- Modify the terrain generation so that it fits a first person perspective
-	- Use Texture2DArray instead of texture atlases
+
+
+Random thoughts:
+
+* I need to store all the chunks linearly in memory as value types. In the World class, I could use an array of chunks which is generated when the game starts. This keeps the allocated memory compact. The size of this array should be (render distance * 2) so that a full set of chunks can be generated while the old are "destroyed".
+
+* A chunk should have an array of _ChunkTile_ which holds a tiles Tile.Type and Height. If the properties of a Tile is needed, it can be accessed via "TileManager.instance.GetTileProperties(tileType)". The same goes for if flags are needed.
+
+* The chunk should have methods such as "SetTileType(x, y, inTileType)" and "SetTileHeight(x, y, inNewHeight)". These methods should be thread safe and only modify the array of _ChunkTile_. After they have modified the TileData, they should put the ID of the tile modified tile into a "int[] modifiedTiles". They should also enable a "bool hasBeenModified" which on the main thread fires off a method which determines which tiles has been modified, and modifies the data of the chunk mesh accordingly.
+
+
+// Contains the definition of a tile in the game and what properties it has
+struct Tile
+{
+	// Each different tile should have a unique Type
+	enum Type
+	{
+		Grass,
+		Stone,
+		Sand
+	}
+	readonly Type type;
+
+	struct Properties
+	{
+		float moveSpeedMultiplier;
+		float moveStaminaDrainMultiplier;
+	}
+	readonly Properties properties;
+}
+
+// The data of a tile a Chunk need to keep track of
+struct ChunkTile
+{
+	Tile.Type tileType;
+	int height;
+}
+
+// Has one of each tile, rather than storing the tile properties in whatever is using the tile, just store it here in one place
+class TileManager
+{
+	Tile.Properties GetTileProperties(Tile.Type inTileType)
+	{
+		//...
+	}
+
+
+}
 
 
 
-Random thought:
 
-* I need a class that mushes together individual textures into a texture atlas. The AtlasManager could do this. It takes in an array of textures, multiple if multiple atlases are needed, and simply reads the pixels and settings.
- 
-* I probably need to generate borders around each texture in the atlas. I'll skip that to begin with an implement it if it's really needed.
 
-* I need to set the horrible garbage default mip maps of the generated atlas. To begin with, I'll make my own weird downscale algorithm to do that. Doesn't have to be pretty, just have to work.
-
-* Rather than using an atlas, I could just create a gigantic Texture2D array!! Just pass the index as a UV2
+// JobManager.instance.DoThreaded(ThrededMethod, CallbackMethod);
