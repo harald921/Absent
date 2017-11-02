@@ -1,10 +1,9 @@
 ﻿/* TODO LIST */
 High Prio:
-	- Find out the max size of texture2DArray
-	- Use Texture2DArray instead of texture atlases
 	- Create a tool to preview noise maps
 
 Med Prio:
+	- Spawn in different types of trees
 	- Add in super basic inventory
 	- Add in the ability to cut down trees and mine stones
 	- Add the ability to modify the terrain
@@ -22,9 +21,8 @@ Low Prio:
 Finished:
 	- Find out a way to map each tile's UVs to a texture atlas
 	- Modify the terrain generation so that it fits a first person perspective
-	- Refactor te spawning of trees and towns. ChunkGenerator should handle all that stuff.
-	- Make trees combine into single mesh
-	
+	- Use Texture2DArray instead of texture atlases
+
 
 
 Random thought:
