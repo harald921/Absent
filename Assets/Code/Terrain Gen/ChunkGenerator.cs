@@ -18,11 +18,8 @@ public class ChunkGenerator
 
     Transform _worldTransform;
 
-    AtlasManager _atlasManager;
-
     public ChunkGenerator(Noise.Parameters[] inParemeters)
     {
-        _atlasManager   = GameObject.FindObjectOfType<AtlasManager>();
         _worldTransform = GameObject.Find("World").transform;
 
         _parameters = inParemeters;
@@ -39,7 +36,7 @@ public class ChunkGenerator
         ProcessQueues();
     }
 
-    public Chunk GenerateChunk(Vector2 inOffset)
+    public Chunk GenerateChunk(Vector2 inOffset, Material veryTemp)
     {
         GameObject newGO = new GameObject(inOffset.ToString());
         newGO.transform.SetParent(_worldTransform);
@@ -52,7 +49,7 @@ public class ChunkGenerator
 
         new Thread(() => GenerateChunkData(inOffset, newChunk)).Start();
 
-        newGO.GetComponent<MeshRenderer>().material.mainTexture = GameObject.FindObjectOfType<AtlasManager>().atlas;
+        newGO.GetComponent<MeshRenderer>().material = veryTemp;
         newGO.GetComponent<MeshRenderer>().material.SetFloat("_Glossiness", 0.0f);
         newGO.GetComponent<MeshRenderer>().material.SetFloat("_Metallic", 0.0f);
 
@@ -78,7 +75,7 @@ public class ChunkGenerator
         noiseThread.Start();
         noiseThread.Join();
 
-        new Thread(() => _meshGenerator.Generate(noiseResult, _atlasManager, inChunk)).Start();
+        new Thread(() => _meshGenerator.Generate(noiseResult, inChunk)).Start();
 
         //new Thread(() => _textureGenerator.Generate(noiseResult, inChunk)).Start();
     }
@@ -91,8 +88,9 @@ public class ChunkGenerator
         Mesh generatedMesh      = inChunk.gameObject.GetComponent<MeshFilter>().mesh;
         generatedMesh.vertices  = inResult.meshData.vertices;
         generatedMesh.uv        = inResult.meshData.uv;
+        generatedMesh.uv2       = inResult.meshData.uv2;
         generatedMesh.triangles = inResult.meshData.triangles;
-        
+
         generatedMesh.RecalculateNormals(); // http://schemingdeveloper.com/2014/10/17/better-method-recalculate-normals-unity/
 
         inChunk.gameObject.GetComponent<MeshFilter>().mesh = generatedMesh;
@@ -157,6 +155,7 @@ public class MeshGenerator
     {
         public Vector3[] vertices;
         public Vector2[] uv;
+        public Vector2[] uv2;
         public int[]     triangles;
     }
     readonly MeshData _meshData;
@@ -195,7 +194,7 @@ public class MeshGenerator
     }
 
 
-    public void Generate(NoiseGenerator.Result inNoiseResult, AtlasManager inAtlasManager, Chunk inChunk)
+    public void Generate(NoiseGenerator.Result inNoiseResult, Chunk inChunk)
     {
         // Generate the vertices of the mesh
         Vector3[] newVertices = new Vector3[_vertexCount];
@@ -227,43 +226,51 @@ public class MeshGenerator
 
 
         vertexID = 0;
-        Vector2[] newUV = new Vector2[_vertexCount];
+        Vector2[] newUV  = new Vector2[_vertexCount];
+        Vector2[] newUV2 = new Vector2[_vertexCount];
         for (int y = 0; y < _size; y++)
         {
             for (int x = 0; x < _size; x++)
             {
-                if (inNoiseResult.heightMap[x,y] < 1.0f)
+                if (inNoiseResult.heightMap[x,y] < 0.8f)
                 {
-                    Vector2[] UVs = inAtlasManager.GetSpriteUVs(0, 0);
+                    newUV[vertexID].x                   = 0;
+                    newUV[vertexID].y                   = 0;
 
-                    newUV[vertexID].x = UVs[0].x;
-                    newUV[vertexID].y = UVs[0].y;
+                    newUV[vertexID + 1].x               = 1;
+                    newUV[vertexID + 1].y               = 0;
 
-                    newUV[vertexID + 1].x = UVs[1].x;
-                    newUV[vertexID + 1].y = UVs[1].y;
+                    newUV[vertexID + _vertexSize].x     = 0;
+                    newUV[vertexID + _vertexSize].y     = 1;
 
-                    newUV[vertexID + _vertexSize].x = UVs[2].x;
-                    newUV[vertexID + _vertexSize].y = UVs[2].y;
+                    newUV[vertexID + _vertexSize + 1].x = 1;
+                    newUV[vertexID + _vertexSize + 1].y = 1;
 
-                    newUV[vertexID + _vertexSize + 1].x = UVs[3].x;
-                    newUV[vertexID + _vertexSize + 1].y = UVs[3].y;
+                    newUV2[vertexID] = new Vector2(2, 0);
+                    newUV2[vertexID + 1] = new Vector2(2, 0);
+                    newUV2[vertexID + _vertexSize] = new Vector2(2, 0);
+                    newUV2[vertexID + _vertexSize + 1] = new Vector2(2, 0);
                 }
 
                 else
                 {
-                    Vector2[] UVs = inAtlasManager.GetSpriteUVs(1, 0);
+                    newUV[vertexID].x = 0;
+                    newUV[vertexID].y = 0;
 
-                    newUV[vertexID].x = UVs[0].x;
-                    newUV[vertexID].y = UVs[0].y;
+                    newUV[vertexID + 1].x = 1;
+                    newUV[vertexID + 1].y = 0;
 
-                    newUV[vertexID + 1].x = UVs[1].x;
-                    newUV[vertexID + 1].y = UVs[1].y;
+                    newUV[vertexID + _vertexSize].x = 0;
+                    newUV[vertexID + _vertexSize].y = 1;
 
-                    newUV[vertexID + _vertexSize].x = UVs[2].x;
-                    newUV[vertexID + _vertexSize].y = UVs[2].y;
+                    newUV[vertexID + _vertexSize + 1].x = 1;
+                    newUV[vertexID + _vertexSize + 1].y = 1;
 
-                    newUV[vertexID + _vertexSize + 1].x = UVs[3].x;
-                    newUV[vertexID + _vertexSize + 1].y = UVs[3].y;
+                    newUV2[vertexID] = new Vector2(1,0);
+                    newUV2[vertexID + 1] = new Vector2(1, 0);
+                    newUV2[vertexID + _vertexSize] = new Vector2(1, 0);
+                    newUV2[vertexID + _vertexSize + 1] = new Vector2(1, 0);
+
                 }
 
                 vertexID += 2;
@@ -275,6 +282,7 @@ public class MeshGenerator
         {
             vertices  = newVertices,
             uv        = newUV,
+            uv2       = newUV2,
             triangles = _meshData.triangles
         };
 

@@ -4,6 +4,8 @@ using System.Collections.Generic;
 
 public class WorldGenerator : MonoBehaviour
 {
+    public Material material;
+
     Noise.Parameters[] _parameters;
     ChunkGenerator _chunkGenerator;
 
@@ -124,7 +126,7 @@ public class WorldGenerator : MonoBehaviour
         {
             Vector2 newChunkCoord = _chunksToGenerate[0];
 
-            _worldChunks.Add(newChunkCoord, _chunkGenerator.GenerateChunk(newChunkCoord));
+            _worldChunks.Add(newChunkCoord, _chunkGenerator.GenerateChunk(newChunkCoord, material));
 
             _chunksToGenerate.RemoveAt(0);
 

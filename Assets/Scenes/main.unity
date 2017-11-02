@@ -118,7 +118,6 @@ GameObject:
   - component: {fileID: 301644286}
   - component: {fileID: 301644285}
   - component: {fileID: 301644284}
-  - component: {fileID: 301644287}
   m_Layer: 0
   m_Name: World
   m_TagString: Untagged
@@ -137,7 +136,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8ed5a24a60dfcd944ac9dd06d9e78066, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _radius: 15
+  material: {fileID: 2100000, guid: dcc6fefe89b3de243ab68ecd918baf59, type: 2}
+  _radius: 30
 --- !u!114 &301644285
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -172,25 +172,11 @@ Transform:
   m_GameObject: {fileID: 301644283}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 4, y: 4, z: 4}
   m_Children: []
   m_Father: {fileID: 0}
   m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &301644287
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_PrefabParentObject: {fileID: 0}
-  m_PrefabInternal: {fileID: 0}
-  m_GameObject: {fileID: 301644283}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: aec006fedd62bfd42a1ac1b7197c8331, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _spriteResolution: 512
-  _paddingThickness: 10
-  _atlas: {fileID: 2800000, guid: 9b24ddc925373cc459b01704e6931010, type: 3}
 --- !u!1 &615401925
 GameObject:
   m_ObjectHideFlags: 0

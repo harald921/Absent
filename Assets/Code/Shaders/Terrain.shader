@@ -2,8 +2,8 @@
 {
 	Properties 
 	{
-		_Color ("Color", Color) = (1,1,1,1)
 		_MainTex ("Tile Texture", 2DArray) = "white" {}
+		_ShineTex("Shine (RGB)", 2D) = "white" {}
 		_Glossiness ("Smoothness", Range(0,1)) = 0.5
 		_Metallic ("Metallic", Range(0,1)) = 0.0
 	}
@@ -11,18 +11,18 @@
 	SubShader 
 	{
 		Tags { "RenderType"="Opaque" }
-		LOD 200
 		
 		CGPROGRAM
 		#pragma surface surf Standard fullforwardshadows
 
 		#pragma target 3.5
-
+		
 		UNITY_DECLARE_TEX2DARRAY(_MainTex);
 
 		struct Input 
 		{
-			float3 worldPos;
+			float2 uv_MainTex   : TEXCOORD0;
+			float2 uv2_ShineTex : TEXCOORD1;
 		};
 
 		half _Glossiness;
@@ -34,8 +34,7 @@
 
 		void surf (Input IN, inout SurfaceOutputStandard o) 
 		{
-			float2 uv = IN.worldPos.xz * 0.02;
-			float4 c = UNITY_SAMPLE_TEX2DARRAY(_MainTex, float3(uv, 0));
+			float4 c = UNITY_SAMPLE_TEX2DARRAY(_MainTex, float3(IN.uv_MainTex, IN.uv2_ShineTex.x));
 
 			o.Albedo	 = c.rgb;
 			o.Metallic	 = _Metallic;
