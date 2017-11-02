@@ -1,5 +1,8 @@
 ﻿/* TODO LIST */
 High Prio:
+	- Make the JobSystem use a threadpool
+	- Optimize the JobSystem
+	- Make the ChunkGenerator code use the JobSystem
 	- Create a "TileSerializer", which is a monobehaviour that allows the user to define every tile type. This class should also initialize and set the TileManager singleton.
 	- Create a "TileManager" singleton which holds an array of "Tile". 
 	- Make each chunk keep track of an array of "ChunkTile", a struct which holds the type and height of a tile on the chunk.
