@@ -21,8 +21,9 @@
 
 		struct Input 
 		{
-			float2 uv_MainTex   : TEXCOORD0;
 			float2 uv2_ShineTex : TEXCOORD1;
+
+			float3 worldPos;
 		};
 
 		half _Glossiness;
@@ -34,7 +35,7 @@
 
 		void surf (Input IN, inout SurfaceOutputStandard o) 
 		{
-			float4 c = UNITY_SAMPLE_TEX2DARRAY(_MainTex, float3(IN.uv_MainTex, IN.uv2_ShineTex.x));
+			float4 c = UNITY_SAMPLE_TEX2DARRAY(_MainTex, float3(IN.worldPos.xz * 0.125, IN.uv2_ShineTex.x));
 
 			o.Albedo	 = c.rgb;
 			o.Metallic	 = _Metallic;
