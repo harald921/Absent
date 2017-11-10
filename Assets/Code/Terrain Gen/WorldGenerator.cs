@@ -41,6 +41,8 @@ public class WorldGenerator : MonoBehaviour
         _parameters = GetComponent<Noise>().parameters;
 
         _chunkGenerator = new ChunkGenerator(_parameters);
+
+        JobSystem.Initialize();
     }
 
     void Update()
@@ -119,7 +121,7 @@ public class WorldGenerator : MonoBehaviour
     IEnumerator GenerateChunks()
     {
         _isGeneratingChunks = true;
-        
+
         while (_chunksToGenerate.Count > 0)
         {
             Vector2 newChunkCoord = _chunksToGenerate[0];
@@ -127,10 +129,7 @@ public class WorldGenerator : MonoBehaviour
             _worldChunks.Add(newChunkCoord, _chunkGenerator.GenerateChunk(newChunkCoord, material));
 
             _chunksToGenerate.RemoveAt(0);
-
-            // yield return null; // TODO: Add option to load more than one chunk per frame
         }
-
 
         _isGeneratingChunks = false;
         yield return null;
