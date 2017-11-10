@@ -57,7 +57,8 @@ public class JobSystem : MonoBehaviour
     {
         Job newJob = new Job();
 
-        currentJobs.Add(newJob);
+        lock (currentJobs)
+            currentJobs.Add(newJob);
 
         newJob.methodToThread = inMethodToThread;
         newJob.mainThreadCallback    = inMainThreadCallback;
