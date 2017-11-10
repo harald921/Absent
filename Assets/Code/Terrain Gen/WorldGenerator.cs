@@ -47,8 +47,6 @@ public class WorldGenerator : MonoBehaviour
     {
         currentCameraChunkCoord = GetChunkCoord(_camTransform.position);
 
-        _chunkGenerator.Update();
-
         //if (Input.GetKeyDown(KeyCode.Space))
             ProcessQueues();
     }

@@ -7,16 +7,15 @@ using System.Collections.Generic;
 
 public class ChunkGenerator
 {
-    public Noise.Parameters[] _parameters { private get; set; }
+    // Fields
+    readonly Noise.Parameters[] _parameters;
 
-    NoiseGenerator   _noiseGenerator;
-    MeshGenerator    _meshGenerator;
+    readonly NoiseGenerator _noiseGenerator;
+    readonly MeshGenerator  _meshGenerator;
 
-    public Queue<Action> _meshThreadInfoQueue    = new Queue<Action>();
-    public Queue<Action> _textureThreadInfoQueue = new Queue<Action>();
+    readonly Transform _worldTransform;
 
-    Transform _worldTransform;
-
+    // Constructor
     public ChunkGenerator(Noise.Parameters[] inParemeters)
     {
         _worldTransform = GameObject.Find("World").transform;
@@ -24,19 +23,12 @@ public class ChunkGenerator
         _parameters = inParemeters;
 
         _noiseGenerator   = new NoiseGenerator(this);
-        _meshGenerator    = new MeshGenerator(this, inParemeters[0].resolution);
-    }
-
-
-    // External
-    public void Update()
-    {
-        ProcessQueues();
+        _meshGenerator    = new MeshGenerator(inParemeters[0].resolution);
     }
 
     public Chunk GenerateChunk(Vector2 inOffset, Material veryTemp)
     {
-        GameObject newGO = new GameObject(inOffset.ToString());
+        GameObject newGO = new GameObject();
         newGO.transform.SetParent(_worldTransform);
         newGO.transform.position = new Vector3(inOffset.x * _parameters[0].resolution, 0, -inOffset.y * _parameters[0].resolution);
 
@@ -56,15 +48,6 @@ public class ChunkGenerator
 
 
     // Internal
-    void ProcessQueues()
-    {
-        while (_meshThreadInfoQueue.Count > 0)
-            _meshThreadInfoQueue.Dequeue()();
-
-        while (_textureThreadInfoQueue.Count > 0)
-            _textureThreadInfoQueue.Dequeue()();
-    }
-
     void GenerateChunkData(Vector2 inOffset, Chunk inChunk)
     {
         NoiseGenerator.Result noiseResult = new NoiseGenerator.Result();
@@ -73,25 +56,26 @@ public class ChunkGenerator
         noiseThread.Start();
         noiseThread.Join();
 
-        new Thread(() => _meshGenerator.Generate(noiseResult, inChunk)).Start();
-
-        //new Thread(() => _textureGenerator.Generate(noiseResult, inChunk)).Start();
+        JobSystem.instance.DoThreaded(() => _meshGenerator.Generate(noiseResult), (o) => OnMeshDataRecieved(o, inChunk));
     }
 
-    public void OnMeshDataRecieved(MeshGenerator.Result inResult, Chunk inChunk)
+    void OnMeshDataRecieved(object inResult, Chunk inChunk)
     {
         if (!inChunk.gameObject)
             return;
 
-        Mesh generatedMesh      = inChunk.gameObject.GetComponent<MeshFilter>().mesh;
-        generatedMesh.vertices  = inResult.meshData.vertices;
-        generatedMesh.uv        = inResult.meshData.uv;
-        generatedMesh.uv2       = inResult.meshData.uv2;
-        generatedMesh.triangles = inResult.meshData.triangles;
+        MeshGenerator.Result result = (MeshGenerator.Result)inResult;
 
-        generatedMesh.RecalculateNormals(); // http://schemingdeveloper.com/2014/10/17/better-method-recalculate-normals-unity/
+        Mesh chunkMesh = inChunk.gameObject.GetComponent<MeshFilter>().mesh;
 
-        inChunk.gameObject.GetComponent<MeshFilter>().mesh = generatedMesh;
+        chunkMesh.vertices  = result.vertices;
+        chunkMesh.uv        = result.uv;
+        chunkMesh.uv2       = result.uv2;
+        chunkMesh.triangles = result.triangles;
+
+        chunkMesh.RecalculateNormals(); // http://schemingdeveloper.com/2014/10/17/better-method-recalculate-normals-unity/
+
+        inChunk.gameObject.GetComponent<MeshFilter>().mesh = chunkMesh;
     }
 }
 
@@ -125,84 +109,79 @@ public class NoiseGenerator
 
 public class MeshGenerator
 {
-    readonly ChunkGenerator _chunkGenerator;
+    // Cached data
+    readonly int   _size;
+    readonly int   _vertexSize;
+    readonly int   _vertexCount;
+    readonly int[] _triangles;
 
-    public class Result
-    {
-        public MeshData meshData;
-    }
 
-    readonly int _size;
-    readonly int _vertexSize;
-    readonly int _vertexCount;
-
-    public struct MeshData
+    // What the generate method will return
+    public class Result 
     {
         public Vector3[] vertices;
         public Vector2[] uv;
         public Vector2[] uv2;
         public int[]     triangles;
     }
-    readonly MeshData _meshData;
 
-    public MeshGenerator(ChunkGenerator inChunkGenerator, int inSize)
+
+    // Constructor
+    public MeshGenerator(int inSize)
     {
-        _chunkGenerator = inChunkGenerator;
+        _size        = inSize;
+        _vertexSize  = inSize * 2;
+        _vertexCount = inSize * inSize * 4;
 
-        _size          = inSize;
-        _vertexSize    = inSize * 2;
-        _vertexCount   = inSize * inSize * 4;
-
-        _meshData = new MeshData()
-        {
-            triangles = new int[inSize * inSize * 6]
-        };
-
-        // Generate the triVertID's
+        // Generate triangle IDs
+        _triangles = new int[inSize * inSize * 6];
         int currentQuad = 0;
         for (int y = 0; y < _vertexSize; y += 2)
             for (int x = 0; x < _vertexSize; x += 2)
             {
                 int triangleOffset = currentQuad * 6;
-                int currentVertex = y * _vertexSize + x;
+                int currentVertex  = y * _vertexSize + x;
 
-                _meshData.triangles[triangleOffset + 0] = currentVertex + 0;
-                _meshData.triangles[triangleOffset + 1] = currentVertex + _vertexSize + 1;
-                _meshData.triangles[triangleOffset + 2] = currentVertex + 1;
+                _triangles[triangleOffset + 0] = currentVertex + 0;
+                _triangles[triangleOffset + 1] = currentVertex + _vertexSize + 1;
+                _triangles[triangleOffset + 2] = currentVertex + 1;
 
-                _meshData.triangles[triangleOffset + 3] = currentVertex + 0;
-                _meshData.triangles[triangleOffset + 4] = currentVertex + _vertexSize + 0;
-                _meshData.triangles[triangleOffset + 5] = currentVertex + _vertexSize + 1;
+                _triangles[triangleOffset + 3] = currentVertex + 0;
+                _triangles[triangleOffset + 4] = currentVertex + _vertexSize + 0;
+                _triangles[triangleOffset + 5] = currentVertex + _vertexSize + 1;
 
                 currentQuad++;
             }
     }
 
 
-    public void Generate(NoiseGenerator.Result inNoiseResult, Chunk inChunk)
+    public Result Generate(NoiseGenerator.Result inHeightData)
     {
-        // Generate the vertices of the mesh
-        Vector3[] newVertices = new Vector3[_vertexCount];
+        Result result = new Result();
+        result.triangles = _triangles;
+
+        // Generate vertices
+        result.vertices = new Vector3[_vertexCount];
         int vertexID = 0;
         for (int y = 0; y < _size; y++)
         {
             for (int x = 0; x < _size; x++)
             {
-                newVertices[vertexID].x = x;
-                newVertices[vertexID].y = inNoiseResult.heightMap[x,y] * 100;
-                newVertices[vertexID].z = y;
+                result.vertices[vertexID].x = x;
+                result.vertices[vertexID].y = inHeightData.heightMap[x,y] * 100;
+                result.vertices[vertexID].z = y;
 
-                newVertices[vertexID + 1].x = x + 1;
-                newVertices[vertexID + 1].y = inNoiseResult.heightMap[x + 1, y] * 100;
-                newVertices[vertexID + 1].z = y;
+                result.vertices[vertexID + 1].x = x + 1;
+                result.vertices[vertexID + 1].y = inHeightData.heightMap[x + 1, y] * 100;
+                result.vertices[vertexID + 1].z = y;
 
-                newVertices[vertexID + _vertexSize].x = x;
-                newVertices[vertexID + _vertexSize].y = inNoiseResult.heightMap[x, y + 1] * 100;
-                newVertices[vertexID + _vertexSize].z = y + 1;
+                result.vertices[vertexID + _vertexSize].x = x;
+                result.vertices[vertexID + _vertexSize].y = inHeightData.heightMap[x, y + 1] * 100;
+                result.vertices[vertexID + _vertexSize].z = y + 1;
 
-                newVertices[vertexID + _vertexSize + 1].x = x + 1;
-                newVertices[vertexID + _vertexSize + 1].y = inNoiseResult.heightMap[x + 1, y + 1] * 100;
-                newVertices[vertexID + _vertexSize + 1].z = y + 1;
+                result.vertices[vertexID + _vertexSize + 1].x = x + 1;
+                result.vertices[vertexID + _vertexSize + 1].y = inHeightData.heightMap[x + 1, y + 1] * 100;
+                result.vertices[vertexID + _vertexSize + 1].z = y + 1;
 
                 vertexID += 2;
             }
@@ -210,52 +189,32 @@ public class MeshGenerator
         }
 
 
+        // Generate UV2 (This is temporary)
+        result.uv  = new Vector2[_vertexCount];
+        result.uv2 = new Vector2[_vertexCount];
         vertexID = 0;
-        Vector2[] newUV  = new Vector2[_vertexCount];
-        Vector2[] newUV2 = new Vector2[_vertexCount];
         for (int y = 0; y < _size; y++)
         {
             for (int x = 0; x < _size; x++)
             {
-                if (inNoiseResult.heightMap[x,y] < 0.8f)
+                if (inHeightData.heightMap[x, y] < 0.8f)
                 {
-                    newUV[vertexID].x                   = 0;
-                    newUV[vertexID].y                   = 0;
+                    int textureID = 2;
 
-                    newUV[vertexID + 1].x               = 1;
-                    newUV[vertexID + 1].y               = 0;
-
-                    newUV[vertexID + _vertexSize].x     = 0;
-                    newUV[vertexID + _vertexSize].y     = 1;
-
-                    newUV[vertexID + _vertexSize + 1].x = 1;
-                    newUV[vertexID + _vertexSize + 1].y = 1;
-
-                    newUV2[vertexID] = new Vector2(2, 0);
-                    newUV2[vertexID + 1] = new Vector2(2, 0);
-                    newUV2[vertexID + _vertexSize] = new Vector2(2, 0);
-                    newUV2[vertexID + _vertexSize + 1] = new Vector2(2, 0);
+                    result.uv2[vertexID]                   = new Vector2(textureID, 0);
+                    result.uv2[vertexID + 1]               = new Vector2(textureID, 0);
+                    result.uv2[vertexID + _vertexSize]     = new Vector2(textureID, 0);
+                    result.uv2[vertexID + _vertexSize + 1] = new Vector2(textureID, 0);
                 }
 
                 else
                 {
-                    newUV[vertexID].x = 0;
-                    newUV[vertexID].y = 0;
+                    int textureID = 2;
 
-                    newUV[vertexID + 1].x = 1;
-                    newUV[vertexID + 1].y = 0;
-
-                    newUV[vertexID + _vertexSize].x = 0;
-                    newUV[vertexID + _vertexSize].y = 1;
-
-                    newUV[vertexID + _vertexSize + 1].x = 1;
-                    newUV[vertexID + _vertexSize + 1].y = 1;
-
-                    newUV2[vertexID] = new Vector2(1,0);
-                    newUV2[vertexID + 1] = new Vector2(1, 0);
-                    newUV2[vertexID + _vertexSize] = new Vector2(1, 0);
-                    newUV2[vertexID + _vertexSize + 1] = new Vector2(1, 0);
-
+                    result.uv2[vertexID]                   = new Vector2(textureID, 0);
+                    result.uv2[vertexID + 1]               = new Vector2(textureID, 0);
+                    result.uv2[vertexID + _vertexSize]     = new Vector2(textureID, 0);
+                    result.uv2[vertexID + _vertexSize + 1] = new Vector2(textureID, 0);
                 }
 
                 vertexID += 2;
@@ -263,18 +222,7 @@ public class MeshGenerator
             vertexID += _vertexSize;
         }
 
-        MeshData newMeshData = new MeshData()
-        {
-            vertices  = newVertices,
-            uv        = newUV,
-            uv2       = newUV2,
-            triangles = _meshData.triangles
-        };
 
-        Result result = new Result();
-        result.meshData = newMeshData;
-
-        lock (_chunkGenerator._meshThreadInfoQueue)
-            _chunkGenerator._meshThreadInfoQueue.Enqueue(() => _chunkGenerator.OnMeshDataRecieved(result, inChunk));
+        return result;
     }
 }
