@@ -1,7 +1,6 @@
 ﻿/* TODO LIST */
 High Prio:
 	- Make the JobSystem use a threadpool
-	- Optimize the JobSystem
 	- Make the ChunkGenerator code use the JobSystem
 	- Create a "TileSerializer", which is a monobehaviour that allows the user to define every tile type. This class should also initialize and set the TileManager singleton.
 	- Create a "TileManager" singleton which holds an array of "Tile". 
@@ -11,7 +10,9 @@ High Prio:
 
 
 Med Prio:
+	- Make each tile have its own tile type
 	- Create a tool to preview noise maps
+	- Optimize the JobSystem
 	- Spawn in different types of trees
 	- Add in super basic inventory
 	- Add in the ability to cut down trees and mine stones
@@ -19,14 +20,14 @@ Med Prio:
 	- Add in ability to build campfire and small shelter
 	
 Low Prio:
-	- Make each tile have its own tile type
+	- Make the terrain smooth shaded (Create own CalculateNormals)
 	- Add save to disk / Load from disk
 	- Implement thermal erosion
 	- Implement hydraulic eriosion
 	- Make Regenerate work with Chunk Objects
 	- Create a few more interesting biomes using the BiomeManager
 	- Create a better system for spawning chunk objects
-	
+	- Make the mesh height multiplier not hard coded and cached when creating the meshgenerator
 
 
 Random thoughts:
