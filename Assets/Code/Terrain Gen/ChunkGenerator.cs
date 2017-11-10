@@ -11,7 +11,6 @@ public class ChunkGenerator
 
     NoiseGenerator   _noiseGenerator;
     MeshGenerator    _meshGenerator;
-    TextureGenerator _textureGenerator;
 
     public Queue<Action> _meshThreadInfoQueue    = new Queue<Action>();
     public Queue<Action> _textureThreadInfoQueue = new Queue<Action>();
@@ -26,7 +25,6 @@ public class ChunkGenerator
 
         _noiseGenerator   = new NoiseGenerator(this);
         _meshGenerator    = new MeshGenerator(this, inParemeters[0].resolution);
-        _textureGenerator = new TextureGenerator(this, inParemeters[0].resolution);
     }
 
 
@@ -95,17 +93,6 @@ public class ChunkGenerator
 
         inChunk.gameObject.GetComponent<MeshFilter>().mesh = generatedMesh;
     }
-
-    public void OnTextureDataRecieved(TextureGenerator.Result inResult, Chunk inChunk)
-    {
-        if (!inChunk.gameObject)
-            return;
-
-        //Texture2D newTexture = new Texture2D(_parameters.size, _parameters.size);
-        //newTexture.filterMode = FilterMode.Point;
-        //newTexture.SetPixels(inResult.pixels);
-        //newTexture.Apply();
-    }
 }
 
 
@@ -118,7 +105,6 @@ public class NoiseGenerator
     public class Result
     {
         public float[,] heightMap;
-        public float[,] mountainMap;
     }
 
 
@@ -131,7 +117,6 @@ public class NoiseGenerator
     public void Generate(Result inResult, Noise.Parameters[] inParameters, Vector2 inOffset, Chunk inChunk)
     {
         inResult.heightMap = Noise.Generate(inParameters[0], inOffset);
-        inResult.mountainMap = Noise.Generate(inParameters[1], inOffset);
     }
 }
 
@@ -204,19 +189,19 @@ public class MeshGenerator
             for (int x = 0; x < _size; x++)
             {
                 newVertices[vertexID].x = x;
-                newVertices[vertexID].y = inNoiseResult.heightMap[x,y] * 100 + inNoiseResult.mountainMap[x,y] * 200;
+                newVertices[vertexID].y = inNoiseResult.heightMap[x,y] * 100;
                 newVertices[vertexID].z = y;
 
                 newVertices[vertexID + 1].x = x + 1;
-                newVertices[vertexID + 1].y = inNoiseResult.heightMap[x + 1, y] * 100 + inNoiseResult.mountainMap[x + 1, y] * 200;
+                newVertices[vertexID + 1].y = inNoiseResult.heightMap[x + 1, y] * 100;
                 newVertices[vertexID + 1].z = y;
 
                 newVertices[vertexID + _vertexSize].x = x;
-                newVertices[vertexID + _vertexSize].y = inNoiseResult.heightMap[x, y + 1] * 100 + inNoiseResult.mountainMap[x, y +1 ] * 200;
+                newVertices[vertexID + _vertexSize].y = inNoiseResult.heightMap[x, y + 1] * 100;
                 newVertices[vertexID + _vertexSize].z = y + 1;
 
                 newVertices[vertexID + _vertexSize + 1].x = x + 1;
-                newVertices[vertexID + _vertexSize + 1].y = inNoiseResult.heightMap[x + 1, y + 1] * 100 + inNoiseResult.mountainMap[x + 1, y + 1] * 200;
+                newVertices[vertexID + _vertexSize + 1].y = inNoiseResult.heightMap[x + 1, y + 1] * 100;
                 newVertices[vertexID + _vertexSize + 1].z = y + 1;
 
                 vertexID += 2;
@@ -291,43 +276,5 @@ public class MeshGenerator
 
         lock (_chunkGenerator._meshThreadInfoQueue)
             _chunkGenerator._meshThreadInfoQueue.Enqueue(() => _chunkGenerator.OnMeshDataRecieved(result, inChunk));
-    }
-}
-
-
-
-
-public class TextureGenerator
-{
-    readonly ChunkGenerator _chunkGenerator;
-
-    public class Result
-    {
-        public Color[] pixels;
-    }
-
-    readonly int _size;
-
-    public TextureGenerator(ChunkGenerator inChunkGenerator, int inSize)
-    {
-        _chunkGenerator = inChunkGenerator;
-
-        _size = inSize;
-    }
-
-
-    public void Generate(NoiseGenerator.Result inNoiseResult, Chunk inChunk)
-    {
-        Color[] pixels = new Color[_size * _size];
-
-        for (int y = 0; y < _size; y++)
-            for (int x = 0; x < _size; x++)
-                pixels[y * _size + x] = Color.Lerp(Color.black, Color.white, 0.5f);
-
-        Result result = new Result();
-        result.pixels = pixels;
-
-        lock (_chunkGenerator._textureThreadInfoQueue)
-            _chunkGenerator._textureThreadInfoQueue.Enqueue(() => _chunkGenerator.OnTextureDataRecieved(result, inChunk));
     }
 }
