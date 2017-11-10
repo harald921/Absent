@@ -22,7 +22,7 @@ public class ChunkGenerator
 
         _parameters = inParemeters;
 
-        _noiseGenerator   = new NoiseGenerator(this);
+        _noiseGenerator   = new NoiseGenerator();
         _meshGenerator    = new MeshGenerator(inParemeters[0].resolution);
     }
 
@@ -50,11 +50,7 @@ public class ChunkGenerator
     // Internal
     void GenerateChunkData(Vector2 inOffset, Chunk inChunk)
     {
-        NoiseGenerator.Result noiseResult = new NoiseGenerator.Result();
-        Thread noiseThread = new Thread(() => _noiseGenerator.Generate(noiseResult, _parameters, inOffset, inChunk));
-
-        noiseThread.Start();
-        noiseThread.Join();
+        NoiseGenerator.Result noiseResult = _noiseGenerator.Generate(_parameters, inOffset);
 
         JobSystem.instance.DoThreaded(() => _meshGenerator.Generate(noiseResult), (o) => OnMeshDataRecieved(o, inChunk));
     }
@@ -84,23 +80,16 @@ public class ChunkGenerator
 
 public class NoiseGenerator
 {
-    readonly ChunkGenerator _chunkGenerator;
-
     public class Result
     {
         public float[,] heightMap;
     }
 
-
-    public NoiseGenerator(ChunkGenerator inChunkGenerator)
+    public Result Generate(Noise.Parameters[] inParameters, Vector2 inOffset)
     {
-        _chunkGenerator = inChunkGenerator;
-    }
-
-
-    public void Generate(Result inResult, Noise.Parameters[] inParameters, Vector2 inOffset, Chunk inChunk)
-    {
-        inResult.heightMap = Noise.Generate(inParameters[0], inOffset);
+        Result result = new Result();
+        result.heightMap = Noise.Generate(inParameters[0], inOffset);
+        return result;
     }
 }
 
@@ -209,7 +198,7 @@ public class MeshGenerator
 
                 else
                 {
-                    int textureID = 2;
+                    int textureID = 1;
 
                     result.uv2[vertexID]                   = new Vector2(textureID, 0);
                     result.uv2[vertexID + 1]               = new Vector2(textureID, 0);
