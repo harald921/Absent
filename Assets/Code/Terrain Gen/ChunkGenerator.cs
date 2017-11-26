@@ -190,20 +190,20 @@ public class MeshGenerator
                 {
                     int textureID = 2;
 
-                    result.uv2[vertexID]                   = new Vector2(textureID, 0);
-                    result.uv2[vertexID + 1]               = new Vector2(textureID, 0);
-                    result.uv2[vertexID + _vertexSize]     = new Vector2(textureID, 0);
-                    result.uv2[vertexID + _vertexSize + 1] = new Vector2(textureID, 0);
+                    result.uv2[vertexID]                   = new Vector2(textureID, textureID);
+                    result.uv2[vertexID + 1]               = new Vector2(textureID, textureID);
+                    result.uv2[vertexID + _vertexSize]     = new Vector2(textureID, textureID);
+                    result.uv2[vertexID + _vertexSize + 1] = new Vector2(textureID, textureID);
                 }
 
                 else
                 {
                     int textureID = 1;
 
-                    result.uv2[vertexID]                   = new Vector2(textureID, 0);
-                    result.uv2[vertexID + 1]               = new Vector2(textureID, 0);
-                    result.uv2[vertexID + _vertexSize]     = new Vector2(textureID, 0);
-                    result.uv2[vertexID + _vertexSize + 1] = new Vector2(textureID, 0);
+                    result.uv2[vertexID]                   = new Vector2(textureID, textureID + 1);
+                    result.uv2[vertexID + 1]               = new Vector2(textureID, textureID + 1);
+                    result.uv2[vertexID + _vertexSize]     = new Vector2(textureID, textureID + 1);
+                    result.uv2[vertexID + _vertexSize + 1] = new Vector2(textureID, textureID + 1);
                 }
 
                 vertexID += 2;
